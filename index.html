@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Santet Engine v2</title>
+<style>
+body {
+    margin:0;
+    background: radial-gradient(circle at center, #120012, #000);
+    font-family: 'Segoe UI', sans-serif;
+    color:#00ffcc;
+    text-align:center;
+    padding:40px;
+    overflow:hidden;
+}
+
+h1 {
+    font-size:40px;
+    text-shadow:0 0 20px #00ffcc;
+}
+
+input, select, button {
+    padding:12px;
+    margin:10px;
+    border:none;
+    border-radius:6px;
+}
+
+button {
+    background:#00ffcc;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#energyBar {
+    width:0%;
+    height:20px;
+    background:#ff0044;
+    margin:20px auto;
+    transition:width 0.2s;
+}
+
+.result {
+    margin-top:30px;
+    font-size:18px;
+}
+.flash {
+    animation:flash 0.2s 5;
+}
+@keyframes flash {
+    0% {background:#000;}
+    50% {background:#330000;}
+    100% {background:#000;}
+}
+</style>
+</head>
+<body>
+
+<h1>🧙‍♂️ SANTET ENGINE v2</h1>
+
+<input type="text" id="nama" placeholder="Nama Target">
+<select id="level">
+<option value="ringan">Ringan</option>
+<option value="absurd">Absurd</option>
+<option value="epic">Epic</option>
+</select>
+
+<br>
+<button onclick="kirimRitual()">🔥 AKTIFKAN RITUAL</button>
+
+<div id="energyBar"></div>
+
+<div class="result" id="hasil"></div>
+<div id="counter"></div>
+
+<script>
+async function kirimRitual() {
+
+    const nama = document.getElementById("nama").value || "Target Misterius";
+    const level = document.getElementById("level").value;
+    const bar = document.getElementById("energyBar");
+    const hasil = document.getElementById("hasil");
+
+    hasil.innerHTML = "🔮 Mengumpulkan energi ritual...";
+    bar.style.width = "0%";
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += 5;
+        bar.style.width = progress + "%";
+        if(progress >= 100) clearInterval(interval);
+    }, 100);
+
+    const response = await fetch("https://automation.kentangbytes.com/webhook/santet-v2", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({target:nama, level:level})
+    });
+
+    const data = await response.json();
+
+    setTimeout(() => {
+        document.body.classList.add("flash");
+
+        hasil.innerHTML = `
+        ⚡ RITUAL SELESAI ⚡<br><br>
+        Target: <b>${data.target}</b><br><br>
+        💀 Efek:<br>
+        ${data.effects.map(e => "• " + e).join("<br>")}
+        `;
+
+        document.getElementById("counter").innerHTML =
+        "🔢 Total Ritual Hari Ini: " + data.counter;
+
+    }, 3000);
+}
+</script>
+
+</body>
+</html>
